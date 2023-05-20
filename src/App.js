@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import MoviesList from './components/MoviesList';
 import './App.css';
@@ -17,7 +17,8 @@ function App() {
     }
   }, [cancelRequest]);
 
-  async function fetchMoviesHandler() {
+
+  const fetchMoviesHandler = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     setCancelRequest(false);
@@ -47,7 +48,11 @@ function App() {
         await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for the specified delay before retrying
       }
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [])
 
   function handleCancelRequest() {
     setCancelRequest(true);
