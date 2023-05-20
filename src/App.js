@@ -26,21 +26,25 @@ function App() {
 
     while (!cancelRequest) {
       try {
-        const response = await fetch('https://swapi.dev/api/films');
+        const response = await fetch('https://react-http-ca306-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json');
         if (!response.ok) {
           throw new Error('Something went wrong! ...Retrying');
         }
         
         const data = await response.json();
   
-        const transformedMovies = data.results.map(movieData => ({
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date
-        }));
-        
-        setMovies(transformedMovies);
+        const loadedMovies = [];
+
+        for(const key in data) {
+          loadedMovies.push({
+            id:key,
+            title: data[key].title,
+            openingText: data[key].openingText,
+            releaseDate: data[key].releaseDate,
+          })
+        }
+
+        setMovies(loadedMovies);
         setIsLoading(false);
         setError(null);
         return;
@@ -55,12 +59,31 @@ function App() {
     fetchMoviesHandler();
   }, [])
 
-  function addMoviesHandler(movie) {
-    console.log(movie);
+  async function addMoviesHandler(movie) {
+    const response = await fetch('https://react-http-ca306-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json', {
+      method: 'POST',
+      body: JSON.stringify(movie),
+      header: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await response.json();
+    console.log(data);
   }
 
   function handleCancelRequest() {
     setCancelRequest(true);
+  }
+
+  async function deleteMoviesHandler(movie) {
+    const response = await fetch(`https://react-http-ca306-default-rtdb.asia-southeast1.firebasedatabase.app/movies/${movie.id}.json`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    const updatedMovies = movies.filter((m) => m.id !== movie.id);
+    setMovies(updatedMovies);
   }
 
   return (
@@ -72,7 +95,7 @@ function App() {
         <button onClick={fetchMoviesHandler} disabled={isLoading}>Fetch Movies</button>
       </section>
       <section>
-        {!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
+        {!isLoading && movies.length > 0 && <MoviesList movies={movies} onDeleteMovie={deleteMoviesHandler} />}
         {!isLoading && movies.length === 0 && !error && <p>No movies found</p>}
         {isLoading && !error && <p>Loading...</p>}
         {isLoading && error && <p>{error}</p>}
