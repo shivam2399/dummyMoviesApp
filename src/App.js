@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import MoviesList from './components/MoviesList';
+import AddMovie from './components/AddMovie';
 import './App.css';
 
 function App() {
@@ -54,12 +55,19 @@ function App() {
     fetchMoviesHandler();
   }, [])
 
+  function addMoviesHandler(movie) {
+    console.log(movie);
+  }
+
   function handleCancelRequest() {
     setCancelRequest(true);
   }
 
   return (
     <React.Fragment>
+      <section>
+        <AddMovie onAddMovie={addMoviesHandler}/>
+      </section>
       <section>
         <button onClick={fetchMoviesHandler} disabled={isLoading}>Fetch Movies</button>
       </section>
